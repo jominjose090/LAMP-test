@@ -1,0 +1,38 @@
+---
+  - name: Install and enable firewall service in all nodes
+    hosts: all
+    become: true
+    tasks:
+        - name: install firewalld
+          yum:
+            name: firewalld
+            state: present
+        - name: start the firewalld service
+          #become: true
+          service:
+            name: firewalld
+            state: started
+            enabled: yes
+  - name: Install Database Maria DB service in DB server
+    hosts: dbserver
+    become: true
+    tasks:
+        - name: install MARIADB server
+          yum:
+            name: mariadb-server
+            state: present
+        - name: start the MARIADB service
+          service:
+            name: mariadb
+            state: started
+            enabled: yes
+        - name: configure firewall to allow DB server connection
+          firewalld:
+            port: 3306/tcp
+            permanent: yes
+            state: enabled
+            zone: public
+        - name: reload the firewalld service    
+          service:
+            name: firewalld
+            state: reloaded
